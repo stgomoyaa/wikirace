@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { isValidLang } from '@/lib/wiki/lang'
+
+const MAX_TITLE_LEN = 300
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
@@ -9,8 +12,18 @@ export async function POST(req: Request) {
     lang?: string
   }
 
-  if (!startTitle || !targetTitle) {
+  if (
+    typeof startTitle !== 'string' ||
+    startTitle.length === 0 ||
+    startTitle.length > MAX_TITLE_LEN ||
+    typeof targetTitle !== 'string' ||
+    targetTitle.length === 0 ||
+    targetTitle.length > MAX_TITLE_LEN
+  ) {
     return NextResponse.json({ error: 'missing_titles' }, { status: 400 })
+  }
+  if (lang !== undefined && !isValidLang(lang)) {
+    return NextResponse.json({ error: 'invalid_lang' }, { status: 400 })
   }
 
   const race = await db.race.create({

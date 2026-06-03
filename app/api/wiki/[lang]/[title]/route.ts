@@ -13,7 +13,8 @@ export async function GET(
     return NextResponse.json({ error: 'invalid_lang' }, { status: 400 })
   }
   try {
-    const article = await fetchArticle(lang, decodeURIComponent(title))
+    // Next.js ya decodifica los params; fetchArticle vuelve a codificar.
+    const article = await fetchArticle(lang, title)
     return NextResponse.json(article, {
       headers: { 'Cache-Control': 'public, s-maxage=86400' },
     })

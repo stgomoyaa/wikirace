@@ -4,7 +4,8 @@ import { fetchArticle } from '@/lib/wiki/client'
 import { validatePath, LinksOf } from '@/lib/race/validate'
 
 // Tope de saltos: evita amplificación de requests salientes a Wikipedia (DoS).
-const MAX_PATH = 200
+// La validación re-fetchea cada salto, así que se mantiene bajo a propósito.
+const MAX_PATH = 50
 const MAX_TITLE_LEN = 300
 
 export async function POST(req: Request) {
