@@ -22,3 +22,20 @@ model Race {
   path        String? // JSON array de títulos
   valid       Boolean   @default(false)
 }
+
+model Puzzle {
+  id           String    @id @default(cuid())
+  lang         String    @default("en")
+  startTitle   String
+  targetTitle  String
+  optimalLen   Int
+  difficulty   String // easy | medium | hard
+  shortestPath String? // JSON array de títulos (camino óptimo de ejemplo)
+  status       String    @default("available") // available | assigned
+  type         String? // daily | practice | ranked | themed
+  date         DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@unique([lang, startTitle, targetTitle])
+  @@index([status, difficulty])
+}
