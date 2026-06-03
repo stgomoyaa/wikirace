@@ -1,0 +1,23 @@
+// Prisma schema — ver diseño en docs/superpowers/specs/
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Race {
+  id          String    @id @default(cuid())
+  lang        String    @default("en")
+  startTitle  String
+  targetTitle String
+  status      String    @default("active") // active | completed | invalid
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  timeMs      Int?
+  clicks      Int?
+  path        String? // JSON array de títulos
+  valid       Boolean   @default(false)
+}
