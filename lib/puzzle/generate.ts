@@ -39,6 +39,7 @@ export function generatePuzzles(graph: Graph, opts: GenerateOptions): PuzzleCand
 
   for (let attempt = 0; attempt < opts.maxStarts && !allFull(); attempt++) {
     const start = graph.randomArticle()
+    if (graph.inDegree(start) < opts.minInDegree) continue
 
     const { dist, prev } = bfs(graph, start, MAX_DEPTH)
 

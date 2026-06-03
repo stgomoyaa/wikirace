@@ -2,11 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { generatePuzzles } from './generate'
 import { InMemoryGraph } from '@/lib/graph/testGraph'
 
-// Cadena 1->2->3->4->5->6 : distancias desde 1 son 1..5
+// Cadena 1->2->3->4->5->6 : distancias desde 1 son 1..5.
+// Nodo 0->1 da al start (1) in-degree 1, para que pase el filtro de popularidad.
 function chain(starts: number[]) {
   return new InMemoryGraph(
-    { 1: [2], 2: [3], 3: [4], 4: [5], 5: [6], 6: [] },
-    { 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F' },
+    { 0: [1], 1: [2], 2: [3], 3: [4], 4: [5], 5: [6], 6: [] },
+    { 0: 'Z', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F' },
     starts,
   )
 }
