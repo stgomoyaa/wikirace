@@ -6,7 +6,16 @@ export interface SanitizeResult {
   links: string[]
 }
 
-const KILL_SELECTORS = ['script', 'style', '.mw-editsection', 'link', 'meta']
+const KILL_SELECTORS = [
+  'script',
+  'style',
+  '.mw-editsection',
+  'link',
+  'meta',
+  'iframe',
+  'object',
+  'embed',
+]
 
 /** Sanea el HTML de un artículo de Wikipedia y extrae sus enlaces internos. */
 export function sanitizeArticleHtml(raw: string): SanitizeResult {
@@ -14,6 +23,22 @@ export function sanitizeArticleHtml(raw: string): SanitizeResult {
 
   for (const sel of KILL_SELECTORS) {
     root.querySelectorAll(sel).forEach((el) => el.remove())
+  }
+
+  // Defensa XSS: quita manejadores de eventos (on*) y URLs javascript: de todos
+  // los elementos antes de procesar los enlaces.
+  for (const el of root.querySelectorAll('*')) {
+    for (const name of Object.keys(el.attributes)) {
+      const lower = name.toLowerCase()
+      if (lower.startsWith('on')) {
+        el.removeAttribute(name)
+      } else if (
+        (lower === 'href' || lower === 'src' || lower === 'xlink:href') &&
+        /javascript:/i.test(el.getAttribute(name) ?? '')
+      ) {
+        el.removeAttribute(name)
+      }
+    }
   }
 
   const links: string[] = []

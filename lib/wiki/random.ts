@@ -1,8 +1,11 @@
+import { isValidLang } from './lang'
+
 /** Devuelve el título de un artículo aleatorio (namespace 0). */
 export async function randomTitle(
   lang: string,
   fetchImpl: typeof fetch = fetch,
 ): Promise<string> {
+  if (!isValidLang(lang)) throw new Error(`invalid lang: ${lang}`)
   const url =
     `https://${lang}.wikipedia.org/w/api.php` +
     `?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*`

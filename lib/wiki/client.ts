@@ -1,5 +1,6 @@
 import { sanitizeArticleHtml } from './sanitize'
 import { normalizeTitle } from './title'
+import { isValidLang } from './lang'
 
 export interface WikiArticle {
   title: string
@@ -17,6 +18,7 @@ export async function fetchArticle(
   title: string,
   fetchImpl: typeof fetch = fetch,
 ): Promise<WikiArticle> {
+  if (!isValidLang(lang)) throw new Error(`invalid lang: ${lang}`)
   const encoded = encodeURIComponent(title.replace(/ /g, '_'))
   const res = await fetchImpl(`${REST_BASE(lang)}/${encoded}`, {
     headers: { 'User-Agent': 'WikiRace/1.0 (contacto@ejemplo.com)' },
