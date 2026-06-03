@@ -1,0 +1,7 @@
+# No subir secretos/locales: Vercel usa sus propias Environment Variables.
+.env
+.env*.local
+node_modules
+.next
+*.db
+*.db-journal
