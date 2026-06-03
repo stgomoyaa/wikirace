@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import { PrismaClient } from '@prisma/client'
 import { SdowGraph } from '@/lib/graph/sdow'
-import { generatePuzzles, Difficulty } from '@/lib/puzzle/generate'
+import { generatePuzzles, type Difficulty } from '@/lib/puzzle/generate'
 
 // Uso:
 //   npx tsx scripts/generate-puzzles.ts --sdow ./sdow.sqlite --easy 100 --medium 100 --hard 100 [--dry-run]
@@ -28,6 +28,18 @@ async function main() {
   const maxStarts = Number(arg('max-starts', '5000'))
   const lang = arg('lang', 'en')!
   const dryRun = flag('dry-run')
+
+  // Validar que los args numéricos sean números reales (NaN rompería los filtros en silencio).
+  const numeric: Record<string, number> = {
+    easy: perTier.easy,
+    medium: perTier.medium,
+    hard: perTier.hard,
+    'min-indegree': minInDegree,
+    'max-starts': maxStarts,
+  }
+  for (const [name, value] of Object.entries(numeric)) {
+    if (!Number.isFinite(value)) throw new Error(`--${name} debe ser un número`)
+  }
 
   const db = new Database(sdowPath, { readonly: true })
   const graph = new SdowGraph(db)
