@@ -5,8 +5,17 @@ export interface BfsResult {
   prev: Map<number, number>
 }
 
-/** BFS desde `source` sobre enlaces salientes, acotado a `maxDepth`. */
-export function bfs(graph: Graph, source: number, maxDepth: number): BfsResult {
+/**
+ * BFS desde `source` sobre enlaces salientes, acotado a `maxDepth` y a `maxNodes`
+ * nodos visitados (para no explotar en grafos enormes). Las distancias de los nodos
+ * visitados siguen siendo las más cortas; sólo se detiene la exploración al llegar al tope.
+ */
+export function bfs(
+  graph: Graph,
+  source: number,
+  maxDepth: number,
+  maxNodes = Infinity,
+): BfsResult {
   const dist = new Map<number, number>([[source, 0]])
   const prev = new Map<number, number>()
   let frontier = [source]
@@ -21,6 +30,7 @@ export function bfs(graph: Graph, source: number, maxDepth: number): BfsResult {
           dist.set(neighbor, d + 1)
           prev.set(neighbor, node)
           next.push(neighbor)
+          if (dist.size >= maxNodes) return { dist, prev }
         }
       }
     }

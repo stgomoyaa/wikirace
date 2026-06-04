@@ -26,6 +26,14 @@ describe('bfs', () => {
     const { dist } = bfs(g2, 1, 10)
     expect(dist.has(9)).toBe(false)
   })
+  it('respeta el tope de nodos (maxNodes) y deja de explorar', () => {
+    const hub = new InMemoryGraph(
+      { 1: [2, 3, 4, 5], 2: [], 3: [], 4: [], 5: [] },
+      { 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E' },
+    )
+    const { dist } = bfs(hub, 1, 10, 3)
+    expect(dist.size).toBe(3) // source + 2 vecinos, luego corta
+  })
 })
 
 describe('shortestPath', () => {

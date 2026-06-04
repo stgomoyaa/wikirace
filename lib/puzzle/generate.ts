@@ -20,6 +20,9 @@ export interface PuzzleCandidate {
 }
 
 const MAX_DEPTH = 6
+// Tope de nodos por BFS: evita explotar desde hubs en el grafo completo de Wikipedia.
+// Las distancias de los nodos visitados siguen siendo exactas; sólo se acota la exploración.
+const MAX_BFS_NODES = 200_000
 
 function tierForLen(len: number): Difficulty | null {
   if (len === 3) return 'easy'
@@ -41,7 +44,7 @@ export function generatePuzzles(graph: Graph, opts: GenerateOptions): PuzzleCand
     const start = graph.randomArticle()
     if (graph.inDegree(start) < opts.minInDegree) continue
 
-    const { dist, prev } = bfs(graph, start, MAX_DEPTH)
+    const { dist, prev } = bfs(graph, start, MAX_DEPTH, MAX_BFS_NODES)
 
     for (const [target, len] of dist) {
       if (target === start) continue
