@@ -21,6 +21,11 @@ model Race {
   clicks      Int?
   path        String? // JSON array de títulos
   valid       Boolean   @default(false)
+  puzzleId    String?
+  playerId    String?
+  isRanked    Boolean   @default(false)
+  stars       Int?
+  rrDelta     Int?
 }
 
 model Puzzle {
@@ -38,4 +43,36 @@ model Puzzle {
 
   @@unique([lang, startTitle, targetTitle])
   @@index([status, difficulty])
+}
+
+model Player {
+  id          String   @id @default(cuid())
+  displayName String?
+  country     String?
+  googleId    String?  @unique
+  createdAt   DateTime @default(now())
+  rating      PlayerRating?
+}
+
+model PlayerRating {
+  playerId       String   @id
+  player         Player   @relation(fields: [playerId], references: [id])
+  points         Int      @default(0)
+  mmr            Int      @default(0)
+  placementsDone Int      @default(0)
+  shields        Int      @default(0)
+  winStreak      Int      @default(0)
+  peakPoints     Int      @default(0)
+  seasonId       Int      @default(1)
+  updatedAt      DateTime @updatedAt
+}
+
+model RatingHistory {
+  id          String   @id @default(cuid())
+  playerId    String
+  raceId      String
+  pointsAfter Int
+  mmrAfter    Int
+  rrDelta     Int
+  createdAt   DateTime @default(now())
 }
