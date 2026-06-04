@@ -6,14 +6,21 @@ let graph: SdowGraph
 
 beforeAll(() => {
   const db = new Database(':memory:')
+  // Esquema real de SDOW: links incluye columnas *_count.
   db.exec(`
     CREATE TABLE pages (id INTEGER PRIMARY KEY, title TEXT, is_redirect INTEGER);
-    CREATE TABLE links (id INTEGER PRIMARY KEY, outgoing_links TEXT, incoming_links TEXT);
+    CREATE TABLE links (
+      id INTEGER PRIMARY KEY,
+      outgoing_links_count INTEGER NOT NULL,
+      incoming_links_count INTEGER NOT NULL,
+      outgoing_links TEXT NOT NULL,
+      incoming_links TEXT NOT NULL
+    );
     INSERT INTO pages VALUES (1,'A',0),(2,'B',0),(3,'C',0);
     INSERT INTO links VALUES
-      (1,'2|3',''),
-      (2,'3','1'),
-      (3,'','1|2');
+      (1,2,0,'2|3',''),
+      (2,1,1,'3','1'),
+      (3,0,2,'','1|2');
   `)
   graph = new SdowGraph(db)
 })
