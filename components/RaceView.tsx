@@ -8,6 +8,8 @@ interface Props {
   lang: string
   start: string
   target: string
+  submitUrl?: string
+  onFinish?: (r: { valid: boolean; timeMs: number; clicks: number; stars: number }) => void
 }
 
 interface Result {
@@ -16,7 +18,7 @@ interface Result {
   clicks: number
 }
 
-export default function RaceView({ raceId, lang, start, target }: Props) {
+export default function RaceView({ raceId, lang, start, target, submitUrl, onFinish }: Props) {
   const [path, setPath] = useState<string[]>([start])
   const [html, setHtml] = useState<string>('')
   const [elapsed, setElapsed] = useState(0)
@@ -48,13 +50,15 @@ export default function RaceView({ raceId, lang, start, target }: Props) {
 
   const submit = useCallback(
     async (finalPath: string[]) => {
-      const res = await fetch('/api/race/submit', {
+      const res = await fetch(submitUrl ?? '/api/race/submit', {
         method: 'POST',
         body: JSON.stringify({ raceId, path: finalPath }),
       })
-      setResult(await res.json())
+      const json = await res.json()
+      setResult(json)
+      onFinish?.(json)
     },
-    [raceId],
+    [raceId, submitUrl, onFinish],
   )
 
   // interceptar clics en enlaces internos
