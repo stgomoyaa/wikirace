@@ -83,7 +83,7 @@ export default function DailyClient() {
         <p>🔥 Racha: {state.streak} (máx {state.maxStreak})</p>
         <button onClick={share} style={{ margin: 8 }}>{shared ? '¡Copiado!' : 'Compartir'}</button>
         <p style={{ marginTop: 24 }}>
-          <a href="/play">▶ Seguir jugando ranked</a>
+          <a href="/ranked">▶ Seguir jugando ranked</a>
         </p>
       </main>
     )
