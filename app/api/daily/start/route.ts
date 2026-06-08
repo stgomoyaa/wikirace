@@ -45,13 +45,20 @@ export async function POST() {
     where: { playerId, puzzleId: daily.puzzleId, isDaily: true, status: 'active' },
   })
   if (!race) {
-    race = await db.race.create({
-      data: {
-        lang: 'en', startTitle: puzzle.startTitle, targetTitle: puzzle.targetTitle,
-        isRanked: true, isDaily: true, puzzleId: puzzle.id, playerId,
-      },
-    })
+    try {
+      race = await db.race.create({
+        data: {
+          lang: 'en', startTitle: puzzle.startTitle, targetTitle: puzzle.targetTitle,
+          isRanked: true, isDaily: true, puzzleId: puzzle.id, playerId,
+        },
+      })
+    } catch {
+      race = await db.race.findFirst({
+        where: { playerId, puzzleId: daily.puzzleId, isDaily: true },
+      })
+    }
   }
+  if (!race) return NextResponse.json({ error: 'conflict' }, { status: 409 })
 
   return NextResponse.json({
     raceId: race.id, number, date, difficulty,
