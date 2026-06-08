@@ -31,8 +31,10 @@ export async function POST() {
   const puzzle = await db.puzzle.findUnique({ where: { id: daily.puzzleId } })
   if (!puzzle) return NextResponse.json({ error: 'no_puzzles' }, { status: 503 })
 
+  // El intento del día está usado si ya hay una carrera daily completada O inválida
+  // (una sola cuenta; evita re-jugar tras fallar y el soft-lock por el índice único).
   const done = await db.race.findFirst({
-    where: { playerId, puzzleId: daily.puzzleId, isDaily: true, status: 'completed' },
+    where: { playerId, puzzleId: daily.puzzleId, isDaily: true, status: { in: ['completed', 'invalid'] } },
   })
   if (done) {
     return NextResponse.json({
@@ -53,8 +55,9 @@ export async function POST() {
         },
       })
     } catch {
+      // Conflicto con un start concurrente: recuperar SÓLO una carrera activa.
       race = await db.race.findFirst({
-        where: { playerId, puzzleId: daily.puzzleId, isDaily: true },
+        where: { playerId, puzzleId: daily.puzzleId, isDaily: true, status: 'active' },
       })
     }
   }
