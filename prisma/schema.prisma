@@ -26,6 +26,7 @@ model Race {
   isRanked    Boolean   @default(false)
   stars       Int?
   rrDelta     Int?
+  isDaily     Boolean   @default(false)
 }
 
 model Puzzle {
@@ -75,4 +76,12 @@ model RatingHistory {
   mmrAfter    Int
   rrDelta     Int
   createdAt   DateTime @default(now())
+}
+
+model Daily {
+  date       String   @id // 'YYYY-MM-DD' (UTC)
+  number     Int
+  puzzleId   String
+  difficulty String
+  createdAt  DateTime @default(now())
 }
