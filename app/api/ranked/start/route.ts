@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { PID_COOKIE, signPid, parsePid } from '@/lib/player/identity'
 import { tierFromPoints } from '@/lib/rank/tiers'
 import { rankedSecret } from '@/lib/config'
+import { chooseUnplayed } from '@/lib/rank/pick'
 
 function difficultyForTier(tier: string): string {
   if (['Iron', 'Bronze', 'Silver'].includes(tier)) return 'easy'
@@ -25,7 +26,16 @@ export async function POST() {
   const view = tierFromPoints(rating?.points ?? 0)
   const difficulty = difficultyForTier(view.tier)
 
-  const puzzle = await db.puzzle.findFirst({ where: { difficulty, lang: 'en' }, orderBy: { createdAt: 'asc' } })
+  const candidates = await db.puzzle.findMany({ where: { difficulty, lang: 'en' }, select: { id: true } })
+  if (candidates.length === 0) return NextResponse.json({ error: 'no_puzzles' }, { status: 503 })
+  const played = await db.race.findMany({
+    where: { playerId, isRanked: true, status: 'completed' }, select: { puzzleId: true },
+  })
+  const candidateIds = candidates.map((c) => c.id)
+  const playedIds = played.map((p) => p.puzzleId).filter((x): x is string => !!x)
+  const chosenId =
+    chooseUnplayed(candidateIds, playedIds) ?? candidateIds[Math.floor(Math.random() * candidateIds.length)]
+  const puzzle = await db.puzzle.findUnique({ where: { id: chosenId } })
   if (!puzzle) return NextResponse.json({ error: 'no_puzzles' }, { status: 503 })
 
   const race = await db.race.create({
