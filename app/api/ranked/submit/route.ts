@@ -73,10 +73,14 @@ export async function POST(req: Request) {
     playerId: race.playerId!, points: 0, mmr: 1000, placementsDone: 0, shields: 0, winStreak: 0, peakPoints: 0,
   }
 
-  const change = computeRrChange({
+  const DAILY_RR_MULTIPLIER = 3
+  const rawChange = computeRrChange({
     timeMs, parMs: parMs(optimalLen), stars, points: rating.points, mmr: rating.mmr,
     isPlacement: rating.placementsDone < 5, winStreak: rating.winStreak,
   })
+  const change = race.isDaily
+    ? { ...rawChange, rrDelta: rawChange.rrDelta * DAILY_RR_MULTIPLIER }
+    : rawChange
 
   const state: RatingState = {
     points: rating.points, mmr: rating.mmr, placementsDone: rating.placementsDone,
