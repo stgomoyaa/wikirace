@@ -19,3 +19,17 @@ export function parsePid(cookie: string, secret: string): string | null {
   if (mac.length !== expected.length) return null
   try { return timingSafeEqual(Buffer.from(mac), Buffer.from(expected)) ? id : null } catch { return null }
 }
+
+/** Extrae y verifica el playerId desde el header Cookie de una request. */
+export function pidFromCookieHeader(header: string | null, secret: string): string | null {
+  if (!header) return null
+  const entry = header
+    .split(';')
+    .map((s) => s.trim())
+    .find((s) => s.startsWith(`${PID_COOKIE}=`))
+  if (!entry) return null
+  const raw = entry.slice(PID_COOKIE.length + 1)
+  let value: string
+  try { value = decodeURIComponent(raw) } catch { value = raw }
+  return parsePid(value, secret)
+}

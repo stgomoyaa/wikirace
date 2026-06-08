@@ -7,6 +7,8 @@ import { starsFor } from '@/lib/score/stars'
 import { parMs } from '@/lib/rank/par'
 import { computeRrChange } from '@/lib/rank/elo'
 import { applyResult, RatingState } from '@/lib/rank/progress'
+import { pidFromCookieHeader } from '@/lib/player/identity'
+import { rankedSecret } from '@/lib/config'
 
 const MAX_PATH = 50
 
@@ -23,13 +25,28 @@ export async function POST(req: Request) {
 
   const race = await db.race.findUnique({ where: { id: raceId } })
   if (!race || !race.isRanked) return NextResponse.json({ error: 'not_found' }, { status: 404 })
+
+  // Autorización: sólo el dueño de la carrera puede enviarla (antes de cualquier cambio de estado).
+  const caller = pidFromCookieHeader(req.headers.get('cookie'), rankedSecret())
+  if (!caller || caller !== race.playerId) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  }
+
   if (race.status !== 'active') return NextResponse.json({ error: 'already_submitted' }, { status: 409 })
 
   const timeMs = Date.now() - new Date(race.startedAt).getTime()
   const clicks = path.length - 1
 
+  /** Reclama atómicamente la carrera (sólo si sigue 'active'). Devuelve true si ganó la carrera. */
+  async function claim(data: Record<string, unknown>): Promise<boolean> {
+    const r = await db.race.updateMany({ where: { id: raceId, status: 'active' }, data })
+    return r.count === 1
+  }
+
   if (isImpossibleTime(timeMs, clicks)) {
-    await db.race.update({ where: { id: raceId }, data: { status: 'invalid', valid: false } })
+    if (!(await claim({ status: 'invalid', valid: false }))) {
+      return NextResponse.json({ error: 'already_submitted' }, { status: 409 })
+    }
     return NextResponse.json({ valid: false, reason: 'impossible_time' })
   }
 
@@ -42,7 +59,9 @@ export async function POST(req: Request) {
   }
 
   if (!result.valid) {
-    await db.race.update({ where: { id: raceId }, data: { status: 'invalid', valid: false, timeMs, clicks, path: JSON.stringify(path) } })
+    if (!(await claim({ status: 'invalid', valid: false, timeMs, clicks, path: JSON.stringify(path) }))) {
+      return NextResponse.json({ error: 'already_submitted' }, { status: 409 })
+    }
     return NextResponse.json({ valid: false, reason: result.reason })
   }
 
@@ -65,7 +84,14 @@ export async function POST(req: Request) {
   }
   const next = applyResult(state, change)
 
-  await db.race.update({ where: { id: raceId }, data: { status: 'completed', valid: true, timeMs, clicks, stars, rrDelta: change.rrDelta, path: JSON.stringify(path) } })
+  // Reclamo atómico: si otro submit ya completó la carrera, no se aplica RR de nuevo.
+  if (!(await claim({
+    status: 'completed', valid: true, completedAt: new Date(),
+    timeMs, clicks, stars, rrDelta: change.rrDelta, path: JSON.stringify(path),
+  }))) {
+    return NextResponse.json({ error: 'already_submitted' }, { status: 409 })
+  }
+
   await db.playerRating.upsert({
     where: { playerId: race.playerId! },
     create: { playerId: race.playerId!, ...next },

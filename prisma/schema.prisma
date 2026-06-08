@@ -58,7 +58,7 @@ model PlayerRating {
   playerId       String   @id
   player         Player   @relation(fields: [playerId], references: [id])
   points         Int      @default(0)
-  mmr            Int      @default(0)
+  mmr            Int      @default(1000)
   placementsDone Int      @default(0)
   shields        Int      @default(0)
   winStreak      Int      @default(0)
@@ -70,7 +70,7 @@ model PlayerRating {
 model RatingHistory {
   id          String   @id @default(cuid())
   playerId    String
-  raceId      String
+  raceId      String   @unique
   pointsAfter Int
   mmrAfter    Int
   rrDelta     Int

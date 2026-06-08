@@ -24,6 +24,9 @@ export async function POST(req: Request) {
 
   const race = await db.race.findUnique({ where: { id: raceId } })
   if (!race) return NextResponse.json({ error: 'not_found' }, { status: 404 })
+  if (race.isRanked) {
+    return NextResponse.json({ error: 'use_ranked_endpoint' }, { status: 400 })
+  }
   if (race.status !== 'active') {
     return NextResponse.json({ error: 'already_submitted' }, { status: 409 })
   }

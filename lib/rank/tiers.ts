@@ -28,7 +28,8 @@ export function applyDelta(points: number, delta: number, shields: number): { po
   let next = points + delta
   if (delta < 0) {
     const floor = tierFloor(points)
-    if (next < floor && shields > 0) return { points: floor, shields: shields - 1 }
+    // El escudo sólo se gasta si protege un piso real (> 0); en Iron (piso 0) no.
+    if (floor > 0 && next < floor && shields > 0) return { points: floor, shields: shields - 1 }
   }
   if (next < 0) next = 0
   return { points: next, shields }

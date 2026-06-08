@@ -3,8 +3,7 @@ import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
 import { PID_COOKIE, signPid, parsePid } from '@/lib/player/identity'
 import { tierFromPoints } from '@/lib/rank/tiers'
-
-const SECRET = process.env.RANKED_SECRET ?? 'dev-secret'
+import { rankedSecret } from '@/lib/config'
 
 function difficultyForTier(tier: string): string {
   if (['Iron', 'Bronze', 'Silver'].includes(tier)) return 'easy'
@@ -13,12 +12,13 @@ function difficultyForTier(tier: string): string {
 }
 
 export async function POST() {
+  const secret = rankedSecret()
   const jar = await cookies()
-  let playerId = parsePid(jar.get(PID_COOKIE)?.value ?? '', SECRET)
+  let playerId = parsePid(jar.get(PID_COOKIE)?.value ?? '', secret)
   if (!playerId) {
     const player = await db.player.create({ data: {} })
     playerId = player.id
-    jar.set(PID_COOKIE, signPid(playerId, SECRET), { httpOnly: true, sameSite: 'lax', path: '/' })
+    jar.set(PID_COOKIE, signPid(playerId, secret), { httpOnly: true, sameSite: 'lax', path: '/' })
   }
 
   const rating = await db.playerRating.findUnique({ where: { playerId } })
