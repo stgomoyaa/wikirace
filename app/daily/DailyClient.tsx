@@ -20,7 +20,18 @@ interface DailyInfo {
 function loadState(): DailyState {
   if (typeof window === 'undefined') return emptyDailyState()
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '') as DailyState
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '') as Partial<DailyState>
+    // Valida la forma: un blob viejo/corrupto no debe romper la pantalla.
+    if (
+      !parsed || typeof parsed !== 'object' ||
+      !Array.isArray(parsed.history) ||
+      typeof parsed.streak !== 'number' ||
+      typeof parsed.maxStreak !== 'number' ||
+      !(parsed.lastDay === null || typeof parsed.lastDay === 'number')
+    ) {
+      return emptyDailyState()
+    }
+    return parsed as DailyState
   } catch {
     return emptyDailyState()
   }
