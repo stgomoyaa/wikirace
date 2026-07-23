@@ -1,9 +1,13 @@
 # WikiRace
 
-Juego de wikirace (navegar Wikipedia usando solo enlaces internos) con ELO,
-leaderboards (global / país / temas) y monetización con AdSense.
+Race between Wikipedia pages using only internal links. ELO, leaderboards
+(global / country / themed), and a server-authoritative race timer with
+anti-cheat path validation and hardened Wikipedia proxy (XSS / SSRF / DoS).
+
+**Live demo:** <https://wikirace-three.vercel.app/play>
 
 Diseño y planes en `docs/superpowers/`:
+
 - `specs/2026-06-02-wikirace-elo-adsense-design.md` — diseño del producto
 - `plans/2026-06-02-wikirace-foundation-playable-race.md` — Plan 1 (esta fase)
 
