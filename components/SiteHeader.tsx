@@ -8,7 +8,10 @@ export function RaceMark({ className = '' }: { className?: string }) {
       fill="none"
       viewBox="0 0 50 50"
     >
-      <path d="m27 39 18-14-18-14v28ZM5 39l18-14L5 11v28Z" />
+      <path d="M7 34 22 17l21 15" />
+      <circle cx="7" cy="34" r="3.5" />
+      <circle cx="22" cy="17" r="3.5" />
+      <circle cx="43" cy="32" r="3.5" />
     </svg>
   )
 }
@@ -19,7 +22,7 @@ export function SiteHeader() {
       <div className="site-header__inner">
         <Link className="brand" href="/" aria-label="WikiRace, ir al inicio">
           <RaceMark className="brand__mark" />
-          <span>WikiRace</span>
+          <span>Wiki<span className="brand__slash">/</span>Race</span>
         </Link>
         <nav className="site-nav" aria-label="Modos de juego">
           <Link href="/daily">Daily</Link>

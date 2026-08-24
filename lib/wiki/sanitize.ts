@@ -15,6 +15,22 @@ const KILL_SELECTORS = [
   'iframe',
   'object',
   'embed',
+  '.navbox',
+  '.vertical-navbox',
+  '.navbox-styles',
+  '.mw-references-wrap',
+  'ol.references',
+  '.reference',
+  '.reflist',
+  '.authority-control',
+  '.portal-bar',
+  '.metadata',
+  '.sistersitebox',
+  '.side-box',
+  '.collapsible-list',
+  '.taxobox-edit-taxonomy',
+  '.mw-empty-elt',
+  '.noprint',
 ]
 
 /** Sanea el HTML de un artículo de Wikipedia y extrae sus enlaces internos. */
@@ -25,12 +41,21 @@ export function sanitizeArticleHtml(raw: string): SanitizeResult {
     root.querySelectorAll(sel).forEach((el) => el.remove())
   }
 
+  for (const infobox of root.querySelectorAll('.infobox')) {
+    for (const row of infobox.querySelectorAll('tr')) {
+      if (!row.text.trim() && !row.querySelector('img')) row.remove()
+    }
+    const remainingRows = infobox.querySelectorAll('tr')
+    const lastRow = remainingRows[remainingRows.length - 1]
+    if (lastRow?.querySelector('th[colspan]') && !lastRow.querySelector('td')) lastRow.remove()
+  }
+
   // Defensa XSS: quita manejadores de eventos (on*) y URLs javascript: de todos
   // los elementos antes de procesar los enlaces.
   for (const el of root.querySelectorAll('*')) {
     for (const name of Object.keys(el.attributes)) {
       const lower = name.toLowerCase()
-      if (lower.startsWith('on')) {
+      if (lower === 'style' || lower.startsWith('on')) {
         el.removeAttribute(name)
       } else if (
         (lower === 'href' || lower === 'src' || lower === 'xlink:href') &&
@@ -50,7 +75,8 @@ export function sanitizeArticleHtml(raw: string): SanitizeResult {
     if (isInternal) {
       const title = normalizeTitle(href)
       a.setAttribute('data-wiki-title', title)
-      a.setAttribute('class', 'wiki-link')
+      const existingClass = a.getAttribute('class')?.trim()
+      a.setAttribute('class', existingClass ? `${existingClass} wiki-link` : 'wiki-link')
       a.removeAttribute('href')
       a.removeAttribute('rel')
       if (!seen.has(title)) {
@@ -65,5 +91,6 @@ export function sanitizeArticleHtml(raw: string): SanitizeResult {
     }
   }
 
-  return { html: root.toString(), links }
+  const body = root.querySelector('body')
+  return { html: body ? body.innerHTML : root.toString(), links }
 }
