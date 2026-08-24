@@ -16,11 +16,15 @@ export default async function ArchiveDaily({ params }: { params: Promise<{ date:
   })
 
   return (
-    <main>
-      <div style={{ textAlign: 'center', padding: 12 }}>
-        <strong>Daily #{daily.number}</strong> · {date} · (práctica de archivo)
+    <div>
+      <div className="mode-strip">
+        <strong>Daily #{daily.number}</strong>
+        <span className="mode-strip__separator">/</span>
+        <span>{date}</span>
+        <span className="mode-strip__separator">/</span>
+        <span>Práctica de archivo</span>
       </div>
       <RaceView raceId={race.id} lang="en" start={puzzle.startTitle} target={puzzle.targetTitle} />
-    </main>
+    </div>
   )
 }

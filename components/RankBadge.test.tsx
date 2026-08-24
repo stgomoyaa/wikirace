@@ -9,6 +9,6 @@ describe('RankBadge', () => {
   })
   it('muestra el progreso de placements cuando aún no termina', () => {
     render(<RankBadge label="Iron IV · 0 RR" placementsDone={2} />)
-    expect(screen.getByText(/Placements 2\/5/)).toBeInTheDocument()
+    expect(screen.getByText(/Posicionamiento 2\/5/)).toBeInTheDocument()
   })
 })
