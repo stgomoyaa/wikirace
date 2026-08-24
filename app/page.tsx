@@ -1,5 +1,5 @@
-import DailyClient from './daily/DailyClient'
+import PlayPage from './play/page'
 
 export default function Home() {
-  return <DailyClient />
+  return <PlayPage />
 }

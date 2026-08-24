@@ -17,12 +17,12 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="site-header__inner">
-        <Link className="brand" href="/" aria-label="WikiRace, ir al daily">
+        <Link className="brand" href="/" aria-label="WikiRace, ir al inicio">
           <RaceMark className="brand__mark" />
           <span>WikiRace</span>
         </Link>
         <nav className="site-nav" aria-label="Modos de juego">
-          <Link href="/">Daily</Link>
+          <Link href="/daily">Daily</Link>
           <Link href="/play">Práctica</Link>
           <Link href="/ranked">Ranked</Link>
           <Link href="/archive">Archivo</Link>
