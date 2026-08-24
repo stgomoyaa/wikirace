@@ -56,6 +56,10 @@ The page uses cool paper and graphite ink. Signal orange is reserved for route r
 ## Product surfaces
 
 - The setup screen is an asymmetric two-column track sheet on desktop and one column on mobile.
+- The language selector controls autocomplete, random picks, article rendering, and path validation in Practice.
+- Changing language clears both article fields so titles from different Wikipedias cannot be mixed.
+- Autocomplete waits for 2 characters, uses a 250ms debounce, and supports Arrow keys, Enter, Escape, pointer selection, and screen-reader listbox semantics.
+- The suggestion list is anchored to its input and overlays the form without shifting layout.
 - The race HUD uses graphite with one orange route rail.
 - Primary actions use graphite, not the accent as a large fill.
 - Focus is immediate with a 3px orange outline.

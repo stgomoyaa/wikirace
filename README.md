@@ -1,56 +1,97 @@
 # WikiRace
 
-Race between Wikipedia pages using only internal links. ELO, leaderboards
-(global / country / themed), and a server-authoritative race timer with
-anti-cheat path validation and hardened Wikipedia proxy (XSS / SSRF / DoS).
+Dog to philosophy. One link at a time.
 
-**Live demo:** <https://wikirace-three.vercel.app/play>
+Pick 2 Wikipedia articles and reach the second using internal links only. WikiRace tracks the route on the server, validates every jump, and supports multiple Wikipedia languages.
 
-Diseño y planes en `docs/superpowers/`:
+[Live demo](https://wikirace-three.vercel.app/) · [Setup](#local-setup) · [Game modes](#game-modes) · [Architecture](#how-it-works) · [Limitations](#what-this-does-not-do)
 
-- `specs/2026-06-02-wikirace-elo-adsense-design.md` — diseño del producto
-- `plans/2026-06-02-wikirace-foundation-playable-race.md` — Plan 1 (esta fase)
+## Try it
 
-## Desarrollo
+1. Choose a Wikipedia language.
+2. Search for the start and target articles. Autocomplete uses Wikipedia's live article index.
+3. Start the race and navigate through highlighted internal links.
+4. Reach the target. The server checks the complete path and calculates the final time.
+
+The practice mode accepts custom article pairs. The same language selection controls autocomplete, random articles, article rendering, and route validation.
+
+## Game modes
+
+| Mode | What it does |
+| --- | --- |
+| Practice | Custom start and target articles, language selector, autocomplete, and random article picks |
+| Daily | One shared puzzle per day with stars, streak tracking, and a share card |
+| Ranked | Puzzle matchmaking, placements, rank rating, and a play-again loop |
+| Archive | Replay previous daily puzzles without affecting the original daily attempt |
+
+## Local setup
+
+Requirements: Node.js, npm, and PostgreSQL.
 
 ```bash
 npm install
-npx prisma migrate dev      # crea/actualiza la base SQLite local
-npm run dev                 # http://localhost:3000/play
-npm test                    # tests con Vitest
-npm run build               # build de producción
+cp .env.example .env
+npx prisma migrate deploy
+npm run dev
 ```
 
-Variables de entorno: copia `.env.example` a `.env`.
+Open <http://localhost:3000/>.
 
-## Estado
+Set `DATABASE_URL` to a PostgreSQL connection string. Production also requires `RANKED_SECRET`, which should be a long random value used to sign player cookies and race tokens.
 
-**Plan 1 (fundación) — completado:** modo **Práctica** jugable de punta a punta.
+Local development may use the built-in `RANKED_SECRET` fallback. Production fails fast when the variable is missing.
 
-- Proxy de Wikipedia con saneo de HTML y extracción de enlaces (`lib/wiki/`)
-- Motor de carrera client-side con intercepción de enlaces (`components/RaceView.tsx`)
-- Tiempo autoritativo del servidor + validación anti-trampa del camino (`app/api/race/`)
-- Endurecimiento de seguridad: validación de idioma (SSRF), saneo XSS, tope de path (DoS)
+## Commands
 
-Pendiente en próximos planes: Daily, ELO ranked, cuentas, leaderboards,
-challenges temáticos, AdSense + SEO.
+```bash
+npm run dev        # Development server
+npm test           # Vitest test suite
+npm run lint       # ESLint
+npm run build      # Production build
+npm start          # Run the production build
+```
 
-## Generación de puzzles (Plan 2)
+## How it works
 
-El grafo de Wikipedia vive fuera de la app (Vercel no lo toca). Para llenar el pool de
-puzzles en Postgres:
+1. The app fetches Wikipedia HTML through a server-side proxy.
+2. The proxy removes scripts, event handlers, inline styles, references, navigation boxes, and other non-game content.
+3. Internal article links become playable `wiki-link` elements. External and non-article links are disabled.
+4. A race record stores the language, start article, target article, and authoritative start time.
+5. On completion, the server fetches each article in the submitted path and verifies that every jump existed.
 
-1. Descarga el grafo precompilado de SDOW (SQLite, varios GB) y guárdalo local
-   (p. ej. `./sdow.sqlite`). No se commitea.
-2. Aplica la migración del modelo `Puzzle` a la DB: `npx prisma migrate deploy`
-   (requiere `DATABASE_URL` en `.env`).
-3. Prueba sin escribir: `npx tsx scripts/generate-puzzles.ts --sdow ./sdow.sqlite --dry-run`
-4. Llena el pool: `npx tsx scripts/generate-puzzles.ts --sdow ./sdow.sqlite --easy 200 --medium 200 --hard 200`
+The proxy also validates Wikipedia language subdomains and limits submitted path length to reduce SSRF, XSS, and request-amplification risks.
 
-El pool dura meses; se rellena corriendo el script de nuevo (es idempotente, `skipDuplicates`).
-Flags: `--min-indegree` (umbral de popularidad), `--max-starts`, `--lang`.
+## Puzzle generation
+
+Daily and ranked puzzles come from an offline Wikipedia graph. Vercel does not load this graph at runtime.
+
+```bash
+npx prisma migrate deploy
+npx tsx scripts/generate-puzzles.ts --sdow ./sdow.sqlite --dry-run
+npx tsx scripts/generate-puzzles.ts --sdow ./sdow.sqlite --easy 200 --medium 200 --hard 200
+```
+
+The generator is idempotent through Prisma `skipDuplicates`. Useful flags include `--min-indegree`, `--max-starts`, and `--lang`.
+
+## What this does not do
+
+- Practice and autocomplete need network access to Wikipedia.
+- Daily and ranked modes need a seeded PostgreSQL puzzle pool. A fresh database has no playable ranked puzzles.
+- The language selector applies to Practice. The current daily and ranked puzzle pool uses English articles.
+- There are no user accounts, public leaderboards, country ladders, or themed challenges yet.
+- The offline graph is several gigabytes and is deliberately kept outside the Vercel deployment.
+
+## Project notes
+
+Product specs and implementation plans live in [`docs/superpowers/`](docs/superpowers/):
+
+- [`2026-06-02-wikirace-elo-adsense-design.md`](docs/superpowers/specs/2026-06-02-wikirace-elo-adsense-design.md)
+- [`2026-06-02-wikirace-foundation-playable-race.md`](docs/superpowers/plans/2026-06-02-wikirace-foundation-playable-race.md)
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · Prisma 6 + **Postgres (Railway)** · Vitest.
-Generación offline: `better-sqlite3` + `tsx` (no entran al bundle de Vercel).
+Next.js 16 App Router, React 19, TypeScript, Prisma 6, PostgreSQL, Vitest, and `better-sqlite3` for offline graph processing.
+
+## License
+
+[MIT](LICENSE). Copyright 2026 Santiago Moya.
