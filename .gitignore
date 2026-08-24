@@ -31,6 +31,12 @@ yarn-error.log*
 # superpowers visual companion
 .superpowers/
 
+# local visual QA tooling
+.qa-venv/
+.qa-output/
+.npm-cache/
+.playwright-browsers/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

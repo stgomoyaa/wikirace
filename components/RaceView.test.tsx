@@ -31,6 +31,6 @@ describe('RaceView', () => {
     render(<RaceView raceId="r1" lang="en" start="Dog" target="Cat" />)
     const link = await screen.findByText('go to cat')
     fireEvent.click(link)
-    await waitFor(() => expect(screen.getByText(/¡Llegaste!/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Llegaste al destino/)).toBeInTheDocument())
   })
 })

@@ -11,7 +11,7 @@ import { POST } from './route'
 import { db } from '@/lib/db'
 import { fetchArticle } from '@/lib/wiki/client'
 
-describe('POST /api/race/submit — DoS hardening', () => {
+describe('POST /api/race/submit: DoS hardening', () => {
   it('rechaza un path sobredimensionado con 400 sin tocar DB ni red', async () => {
     const huge = Array.from({ length: 5000 }, (_, i) => `A${i}`)
     const req = new Request('http://x', {
