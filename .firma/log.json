@@ -2,6 +2,17 @@
   {
     "date": "2026-08-24",
     "family": "Product",
+    "macro": "Track sheet",
+    "theme": "Signal/Graphite",
+    "direction": "editorial-sport",
+    "display": "Teko",
+    "nav": "segmented rail",
+    "interaction": "deliberate stillness",
+    "brief": "Wikipedia link racing game reader"
+  },
+  {
+    "date": "2026-08-24",
+    "family": "Product",
     "macro": "Race console",
     "theme": "Lime/Indigo",
     "direction": "warm-playful",

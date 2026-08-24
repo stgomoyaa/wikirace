@@ -138,12 +138,18 @@ export default function RaceView({ raceId, lang, start, target, submitUrl, onFin
           <button className="button button--secondary" onClick={() => window.location.reload()}>Recargar</button>
         </section>
       ) : html ? (
-        <article
-          ref={containerRef}
-          className="wiki-article"
-          onClick={onClick}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <article className="wiki-article">
+          <header className="wiki-article__masthead">
+            <span>Artículo actual</span>
+            <h1>{current}</h1>
+          </header>
+          <div
+            ref={containerRef}
+            className="wiki-article__content"
+            onClick={onClick}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </article>
       ) : (
         <section className="status-panel" aria-live="polite">
           <span className="loader" aria-hidden="true" />

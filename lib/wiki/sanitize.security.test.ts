@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { sanitizeArticleHtml } from './sanitize'
 
-describe('sanitizeArticleHtml — XSS hardening', () => {
+describe('sanitizeArticleHtml: XSS hardening', () => {
   it('quita manejadores de eventos on*', () => {
     const { html } = sanitizeArticleHtml(
       '<a rel="mw:WikiLink" href="./X" onclick="evil()">x</a>',
